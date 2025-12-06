@@ -2,6 +2,7 @@ package com.qf.shuati.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jd.platform.hotkey.client.callback.JdHotKeyStore;
 import com.qf.shuati.common.BaseResponse;
 import com.qf.shuati.common.DeleteRequest;
 import com.qf.shuati.common.ErrorCode;
@@ -123,7 +124,18 @@ public class QuestionBankController {
         ThrowUtils.throwIf(questionBankQueryRequest == null, ErrorCode.PARAMS_ERROR);
         Long id =  questionBankQueryRequest.getId();
         ThrowUtils.throwIf(id < 0, ErrorCode.PARAMS_ERROR);
-        //TODO 缓存
+
+        //生成key
+        String key = "bank_detail_" + id;
+        //如果是熱key
+        if(JdHotKeyStore.isHotKey(key)) {
+            //從本地緩存中獲取緩存值
+            Object cacheQuestionBankVO = JdHotKeyStore.get(key);
+            if(cacheQuestionBankVO != null){
+                return ResultUtils.success((QuestionBankVO) cacheQuestionBankVO);
+            }
+        }
+
         //查询数据库
         QuestionBank questionBank  = questionBankService.getById(id);
         ThrowUtils.throwIf(questionBank == null, ErrorCode.PARAMS_ERROR);
@@ -142,6 +154,10 @@ public class QuestionBankController {
             questionBankVO.setQuestionPage(questionVOPage);
         }
         log.info(questionBankVO.toString());
+
+        //設置本地緩存(如果不是熱key,這個方法不會設置緩存
+        JdHotKeyStore.smartSet(key,questionBankVO);
+
         return ResultUtils.success(questionBankVO);
     }
 

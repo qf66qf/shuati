@@ -47,6 +47,12 @@ sa-token:
 cos:
     client:
         secretKey: XXX
-        region: XXXX
-        bucket: XXXX
-        accessKey: XXXX
+        region: XXX
+        bucket: XXX
+        accessKey: XXX
+hotkey:
+    etcd-server: http://127.0.0.1:2379
+    app-name: shuati
+    caffeine-size: 10000
+    push-period: 1000
+
